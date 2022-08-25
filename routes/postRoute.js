@@ -16,12 +16,12 @@ router.use(auth);
 router.post('/create_post', createPost);
 router.get('/posts', getPosts);
 
-// router.route('/post/:id').get(auth, getPost).delete(auth, deletePost);
+router.route('/post/:id').get(auth, getPost).delete(auth, deletePost);
 
-// router.patch('/post/:id/like', auth, likePost);
+router.patch('/post/:id/like', auth, likePost);
 
-// router.patch('/post/:id/unlike', auth, unlikePost);
+router.patch('/post/:id/unlike', auth, unlikePost);
 
-// router.get('/user_posts/:id', auth, getUserPosts);
+router.get('/user_posts/:id', auth, getUserPosts);
 
 export default router;

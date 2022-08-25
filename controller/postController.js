@@ -47,7 +47,7 @@ export const getPosts = async (req, res) => {
   try {
     const features = new APIfeatures(
       Posts.find({
-        user: [...req.user.following, req.user._id],
+        user: [req.user._id],
       }),
       req.query
     ).paginating();
