@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema(
       default: '',
       maxlength: 200,
     },
+    rf_token: { type: String, select: false },
   },
   {
     timestamps: true,
