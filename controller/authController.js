@@ -74,9 +74,8 @@ export const login = async (req, res) => {
 
     res.cookie('refreshtoken', refresh_token, {
       httpOnly: true,
-      //cross-site cookie
       path: '/api/refresh_token',
-      maxAge: 7 * 24 * 60 * 60 * 1000, //cookie expiry: set to match rT
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30days
     });
 
     res.json({
@@ -93,13 +92,19 @@ export const login = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
+  if (!req.user)
+    return res.status(400).json({ message: 'Invalid Authentication.' });
+
   try {
-    const cookies = req.cookies;
-    if (!cookies?.refreshtoken) return res.sendStatus(204);
-    res.clearCookie('refreshtoken', {
-      path: '/api/refresh_token',
-      httpOnly: true,
-    });
+    res.clearCookie('refreshtoken', { path: `/api/refresh_token` });
+
+    await Users.findOneAndUpdate(
+      { _id: req.user._id },
+      {
+        rf_token: '',
+      }
+    );
+
     return res.json({ message: 'Logged out!' });
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -108,31 +113,30 @@ export const logout = async (req, res) => {
 
 export const generateAccessToken = async (req, res) => {
   try {
-    const cookies = req.cookies;
+    const rf_token = req.cookies.refreshtoken;
+    if (!rf_token)
+      return res.status(400).json({ message: 'Please login now!' });
+    const decoded = jwt.verify(rf_token, `${process.env.REFRESH_TOKEN_SECRET}`);
+    if (!decoded.id)
+      return res.status(400).json({ message: 'Please login now!' });
+    const user = await Users.findById(decoded.id).select('-password +rf_token');
+    if (!user)
+      return res.status(400).json({ message: 'This account does not exist.' });
 
-    if (!cookies?.refreshtoken)
-      return res.status(401).json({ message: 'Unauthorized' });
+    if (rf_token !== user.rf_token)
+      return res.status(400).json({ message: 'Please login now!' });
 
-    const rf_token = cookies.refreshtoken;
+    const access_token = createAccessToken({ id: user._id });
+    const refresh_token = createRefreshToken({ id: user._id }, res);
 
-    jwt.verify(
-      rf_token,
-      process.env.REFRESH_TOKEN_SECRET,
-      async (err, result) => {
-        if (err) return res.status(400).json({ message: 'Please login now.' });
-
-        const user = await Users.findById(result.id);
-
-        if (!user)
-          return res.status(400).json({ message: 'This does not exist.' });
-
-        const access_token = createAccessToken({ id: result.id });
-
-        res.json({
-          access_token,
-        });
+    await Users.findOneAndUpdate(
+      { _id: user._id },
+      {
+        rf_token: refresh_token,
       }
     );
+
+    res.json({ access_token, user });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
