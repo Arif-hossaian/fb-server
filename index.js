@@ -40,10 +40,6 @@ app.all('*', (req, res) => {
   }
 });
 
-app.get('/', (req, res) => {
-  res.json({ message: 'server running' });
-});
-
 const CONNECTION_URL = process.env.MONGODB_URL;
 mongoose.connect(`${CONNECTION_URL}`, (err) => {
   if (err) throw err;

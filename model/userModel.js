@@ -31,11 +31,6 @@ const userSchema = new mongoose.Schema(
     },
     role: { type: String, default: 'user' },
     gender: { type: String, default: 'male' },
-    story: {
-      type: String,
-      default: '',
-      maxlength: 200,
-    },
     rf_token: { type: String, select: false },
   },
   {

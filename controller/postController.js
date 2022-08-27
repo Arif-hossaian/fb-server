@@ -1,4 +1,3 @@
-import Users from '../model/userModel.js';
 import Posts from '../model/postModel.js';
 import Comments from '../model/commentModel.js';
 
@@ -89,23 +88,6 @@ export const getPost = async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });
-  }
-};
-
-export const getUserPosts = async (req, res) => {
-  try {
-    const features = new APIfeatures(
-      Posts.find({ user: req.params.id }),
-      req.query
-    ).paginating();
-    const posts = await features.query.sort('-createdAt');
-
-    res.json({
-      posts,
-      result: posts.length,
-    });
-  } catch (err) {
-    return res.status(500).json({ msg: err.message });
   }
 };
 

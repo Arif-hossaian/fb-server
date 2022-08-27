@@ -4,7 +4,6 @@ import {
   deletePost,
   getPost,
   getPosts,
-  getUserPosts,
   likePost,
   unlikePost,
 } from '../controller/postController.js';
@@ -21,7 +20,5 @@ router.route('/post/:id').get(auth, getPost).delete(auth, deletePost);
 router.patch('/post/:id/like', auth, likePost);
 
 router.patch('/post/:id/unlike', auth, unlikePost);
-
-router.get('/user_posts/:id', auth, getUserPosts);
 
 export default router;
